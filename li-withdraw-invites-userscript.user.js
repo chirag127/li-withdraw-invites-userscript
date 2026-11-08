@@ -36,14 +36,16 @@
   const typing = () => /input|textarea/i.test(document.activeElement.tagName);
 
   function invites() {
-    const found = [];
-    for (const row of document.querySelectorAll(ROW_SEL)) {
-      const btn = [...row.querySelectorAll("button")].find((b) => BTN_TEXTS.some((t) => (b.textContent || "").trim().toLowerCase() === t.toLowerCase()));
-      if (!btn) continue;
-      const name = (row.querySelector('a[href*="/in/"]') || row).textContent.trim().split("\n")[0];
-      found.push({ row, btn, name });
+    const out = [];
+    for (const btn of document.querySelectorAll("button")) {
+      if (!/^withdraw$/i.test((btn.textContent || "").trim())) continue;
+      let row = btn.closest("li") || btn.parentElement;
+      for (let i = 0; i < 5 && row && !row.querySelector('a[href*="/in/"]'); i++) row = row.parentElement;
+      const link = row && row.querySelector('a[href*="/in/"]');
+      const name = ((link && link.textContent) || (row && row.textContent) || "").trim().split("\n")[0].slice(0, 80);
+      out.push({ row, btn, name });
     }
-    return found;
+    return out;
   }
 
   async function run(dry) {
